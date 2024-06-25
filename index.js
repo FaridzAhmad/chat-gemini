@@ -21,6 +21,7 @@ const figlet = require("figlet");
 const _ = require("lodash");
 const PhoneNumber = require("awesome-phonenumber");
 
+
 const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) });
 
 const color = (text, color) => {
@@ -250,10 +251,15 @@ async function startHisoka() {
       }
     } else if (connection === "open") {
       const botNumber = await client.decodeJid(client.user.id);
+
       console.log(color("Bot success conneted to server", "green"));
       console.log(color("", "yellow"));
       console.log(color("Type /menu to see menu"));
       client.sendMessage(botNumber, { text: `Bot Aktif!` });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: "Hello from WhatsApp Web function" }),
+      };
     }
     // console.log('Connected...', update)
   });

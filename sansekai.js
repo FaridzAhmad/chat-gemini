@@ -5,6 +5,14 @@ const chalk = require("chalk");
 const OpenAI = require("openai");
 let setting = require("./key.json");
 const openai = new OpenAI({ apiKey: setting.keyopenai });
+const tt = require('@danielgutierrez/tiktokdownloaders');
+const { fromUrl } = require('tiktok-scraper');
+const { TiktokDownloader } = require("@tobyg74/tiktok-api-dl");
+const axios = require("axios");
+const ytdl = require('ytdl-core');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+// const tiktokdownloader = new TiktokDownloaders();
+
 
 module.exports = sansekai = async (client, m, chatUpdate) => {
   try {
@@ -38,6 +46,7 @@ module.exports = sansekai = async (client, m, chatUpdate) => {
     let text = (q = args.join(" "));
     const arg = budy.trim().substring(budy.indexOf(" ") + 1);
     const arg1 = arg.trim().substring(arg.indexOf(" ") + 1);
+    const videoUrl = body.split(' ')[1];
 
     const from = m.chat;
     const reply = m.reply;
@@ -71,20 +80,17 @@ module.exports = sansekai = async (client, m, chatUpdate) => {
 
     if (isCmd2) {
       switch (command) {
-        case "help": case "menu": case "start": case "info":
-          m.reply(`*Whatsapp Bot OpenAI*
+        case "help": case "menu": case "start": case "info": case "hi":
+          m.reply(`*Whatsapp Bot Gemini*
             
-*(ChatGPT)*
-Cmd: ${prefix}ai 
-Tanyakan apa saja kepada AI. 
+*(GEMINI)*
+Cmd: ${prefix}tanyadong 
+Tanyakan apa saja.
 
-*(DALL-E)*
-Cmd: ${prefix}img
-Membuat gambar dari teks
+Contoh : "${prefix}tanyadong lirik lagu Kalah by Aftershine
 
-*(Source Code Bot)*
-Cmd: ${prefix}sc
-Menampilkan source code bot yang dipakai`)
+credit mlchamlna_
+`)
           break;
         case "ai": case "openai": case "chatgpt": case "ask":
           try {
@@ -131,6 +137,23 @@ Menampilkan source code bot yang dipakai`)
           }
         }
           break;
+          case "tanyadong":
+            try {
+              const genAI = new GoogleGenerativeAI("AIzaSyC5ojNA4JpvrnGp7XKpUSMBWvI9mxvl7xE");
+              const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+
+              const result = await model.generateContent(q);
+              const response = await result.response;
+              const text = response.text();
+
+              await m.reply(text);
+              console.log(text);
+          } catch (error) {
+            
+            console.log(error)  
+          }
+              
+          break
           case "sc": case "script": case "scbot":
            m.reply("Bot ini menggunakan script dari https://github.com/Sansekai/Wa-OpenAI");
           break
@@ -162,3 +185,19 @@ fs.watchFile(file, () => {
   delete require.cache[file];
   require(file);
 });
+async function downloadVideo(url, fileName) {
+  const writer = fs.createWriteStream(fileName);
+
+  const response = await axios({
+      url,
+      method: 'GET',
+      responseType: 'stream'
+  });
+
+  response.data.pipe(writer);
+
+  return new Promise((resolve, reject) => {
+      writer.on('finish', resolve);
+      writer.on('error', reject);
+  });
+}
